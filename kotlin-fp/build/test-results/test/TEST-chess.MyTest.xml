@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="chess.MyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2021-03-19T12:14:50" hostname="GUVA-195068-C02YH05ZJHD5" time="0.023">
+  <properties/>
+  <testcase name="returns the string representation of Position" classname="chess.MyTest" time="0.015"/>
+  <testcase name="returns the matrix position from string" classname="chess.MyTest" time="0.0"/>
+  <testcase name="returns valid positions for Rook at given position" classname="chess.MyTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

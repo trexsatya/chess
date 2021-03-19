@@ -1,0 +1,50 @@
+buildscript {
+    ext.kotlin_version = '1.3.11'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+group 'com.satya'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "io.arrow-kt:arrow-core:0.7.3"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.spekframework.spek2', name: 'spek-dsl-jvm', version: '2.0.15'
+    testImplementation group: 'org.spekframework.spek2', name: 'spek-runner-junit5', version: '2.0.15'
+    testCompile('org.junit.jupiter:junit-jupiter-api:5.4.0')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.0')
+    testRuntime('org.junit.vintage:junit-vintage-engine:5.4.0')
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.6' //version required
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'spek2'
+    }
+}

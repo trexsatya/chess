@@ -1,0 +1,6 @@
+.stack-work/
+*~
+*.lock
+.idea
+dist*
+*.iml
