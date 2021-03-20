@@ -8,12 +8,12 @@ object MyTest: Spek({
 //    println("this is the root")
     fun boardForTesting(pieces: List<Pair<Position, Piece>>): ChessBoard {
         return object: ChessBoard {
-            override fun toVector(cb: ChessBoard): List<Piece?> {
+            override fun toVector(): List<Piece?> {
                 val cells: List<Piece?> = (1..64).map { null }
                 return updatedList(cells, pieces.map { Pair(toIndex(it.first), it.second) })
             }
-            override fun highlights(cb: ChessBoard): List<BackgroundColor?> { return (1..64).map { null } }
-            override fun nextPlayer(cb: ChessBoard): Color { return Color.WHITE }
+            override fun highlights(): List<BackgroundColor?> { return (1..64).map { null } }
+            override fun nextPlayer(): Color { return Color.WHITE }
         }
     }
 

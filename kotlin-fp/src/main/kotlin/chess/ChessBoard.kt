@@ -46,14 +46,14 @@ enum class BackgroundColor {
 interface ChessBoard {
     //    Transforms a ChessBoard into a 'Vector' of square (either populated
 //    or empty), index 0 being square a1 and index 63 being square h8.
-    fun toVector(cb: ChessBoard): List<Piece?>
-    fun highlights(cb: ChessBoard): List<BackgroundColor?>
-    fun nextPlayer(cb: ChessBoard): Color
+    fun toVector(): List<Piece?>
+    fun highlights(): List<BackgroundColor?>
+    fun nextPlayer(): Color
 }
 
 fun initialPosition(): ChessBoard {
     return object : ChessBoard {
-        override fun toVector(cb: ChessBoard): List<Piece?> {
+        override fun toVector(): List<Piece?> {
             val rearRow = listOf(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
             val whiteRearRow = rearRow.map { Piece(WHITE, it) }
             val whiteFrontRow = (1..8).map { Piece(WHITE, Pawn) }
@@ -63,17 +63,17 @@ fun initialPosition(): ChessBoard {
 
             return whiteRearRow + whiteFrontRow + (1..4).map { emptyRow }.flatten() + blackFrontRow + blackRearRow
         }
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> { return (1..64).map { null } }
-        override fun nextPlayer(cb: ChessBoard): Color { return WHITE }
+        override fun highlights(): List<BackgroundColor?> { return (1..64).map { null } }
+        override fun nextPlayer(): Color { return WHITE }
     }
 }
 
 //-- | Change player making the next move.
 fun switch(cb: ChessBoard): ChessBoard {
     return object : ChessBoard {
-        override fun toVector(cb: ChessBoard): List<Piece?> { return toVector(cb) }
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> { return highlights(cb) }
-        override fun nextPlayer(cb: ChessBoard): Color { return other(nextPlayer(cb)) }
+        override fun toVector(): List<Piece?> { return cb.toVector() }
+        override fun highlights(): List<BackgroundColor?> { return cb.highlights() }
+        override fun nextPlayer(): Color { return other(cb.nextPlayer()) }
     }
 }
 
@@ -87,8 +87,8 @@ fun showChessBoard(cb: ChessBoard): String {
                 (1..4).map { listOf(Cyan, White) }.flatten()
     }.flatten()
 
-    val colorCodes = cb.highlights(cb).zip(alternateBlackWhite)
-    val cells = colorCodes.zip(cb.toVector(cb))
+    val colorCodes = cb.highlights().zip(alternateBlackWhite)
+    val cells = colorCodes.zip(cb.toVector())
     val cells2d = cells.chunked(8)
     val showLine = { highlightCol_bgCol_piece: Pair<Pair<BackgroundColor?, BackgroundColor>, Piece?> ->
         val (colors, piece) = highlightCol_bgCol_piece
@@ -108,7 +108,7 @@ fun showChessBoard(cb: ChessBoard): String {
 fun at(cb: ChessBoard, pos: Position): Piece? {
     val i = toIndex(pos)
     if (i < 0 || i > 63) return null
-    return cb.toVector(cb)[i]
+    return cb.toVector()[i]
 }
 
 fun cellIsEmpty(cb: ChessBoard, pos: Position): Boolean {
@@ -274,37 +274,37 @@ fun <T> updatedList(list: List<T>, values: List<Pair<Int, T>>): List<T> {
     return ml.toList()
 }
 
-fun showPossibleMoves(pos: Position?, board: ChessBoard): ChessBoard {
-    if(pos == null) return board
+fun showPossibleMoves(pos: Position?, cb: ChessBoard): ChessBoard {
+    if(pos == null) return cb
 
     return object: ChessBoard {
-        override fun toVector(cb: ChessBoard): List<Piece?> {
-            return cb.toVector(board)
+        override fun toVector(): List<Piece?> {
+            return cb.toVector()
         }
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> {
+        override fun highlights(): List<BackgroundColor?> {
             val highlighted = {cells: List<Int> -> (1..64).map { if (it in cells) Yellow else null}}
             val yellows = highlighted(possiblePositionsToMove(cb, pos).map { toIndex(it) + 1 })
             return updatedList(yellows, listOf(Pair(toIndex(pos), Maroon)))
         }
-        override fun nextPlayer(cb: ChessBoard): Color {
-            return cb.nextPlayer(board)
+        override fun nextPlayer(): Color {
+            return cb.nextPlayer()
         }
     }
 }
 
-fun movePiece(posX: Position?, posY: Position?, board: ChessBoard): ChessBoard {
-    if(posX == null || posY == null) return board;
+fun movePiece(posX: Position?, posY: Position?, cb: ChessBoard): ChessBoard {
+    if(posX == null || posY == null) return cb;
     return switch(object: ChessBoard {
-        override fun toVector(cb: ChessBoard): List<Piece?> {
-            val cells = cb.toVector(board)
+        override fun toVector(): List<Piece?> {
+            val cells = cb.toVector()
             return updatedList(cells, listOf(Pair(toIndex(posX), null),
                                              Pair(toIndex(posY), cells[toIndex(posX)])))
         }
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> {
+        override fun highlights(): List<BackgroundColor?> {
             return (1..64).map { null }
         }
-        override fun nextPlayer(cb: ChessBoard): Color {
-            return cb.nextPlayer(board)
+        override fun nextPlayer(): Color {
+            return cb.nextPlayer()
         }
     })
 }
@@ -315,7 +315,7 @@ fun validateAndMakeMove(fromPos: Position?, toPos: Position?, board: ChessBoard)
     }
     val pickedPiece = at(board, fromPos)
     val y = toIndex(toPos)
-    val ys = possiblePositionsToMove(board, fromPos).map { toIndex(it)+1 }
+    val ys = possiblePositionsToMove(board, fromPos).map { toIndex(it) }
 
     if(pickedPiece == null) {
         return Either.left(listOf("No piece at selected position"))
@@ -324,7 +324,7 @@ fun validateAndMakeMove(fromPos: Position?, toPos: Position?, board: ChessBoard)
         return Either.left(listOf("Not allowed! ${y} not in ${ys}"))
     }
     val (color, typ) = pickedPiece
-    if(color != board.nextPlayer(board)) {
+    if(color != board.nextPlayer()) {
         return Either.left(listOf("Not your turn!"))
     }
     return Either.right(movePiece(fromPos, toPos, board))

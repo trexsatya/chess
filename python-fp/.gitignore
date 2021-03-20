@@ -4,3 +4,7 @@ venv
 __pycache__/
 .DS_Store
 dev.db
+.gradle
+out
+bin
+build

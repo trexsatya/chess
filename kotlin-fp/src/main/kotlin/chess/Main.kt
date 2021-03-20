@@ -10,7 +10,7 @@ fun game(msg: String?, cb: ChessBoard) {
         println(msg)
     }
 
-    print("input ${if(cb.nextPlayer(cb) == Color.WHITE) "WHITE" else "BLACK"} > ")
+    print("input ${if(cb.nextPlayer() == Color.WHITE) "WHITE" else "BLACK"} > ")
     execute(cb, readLine())
 }
 
