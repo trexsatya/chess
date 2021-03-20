@@ -22,5 +22,7 @@ Functionalities:
 
 Haskell Cheat Sheet: https://jutge.org/doc/haskell-cheat-sheet.pdf
 
+Portability of Monad concept into other programming languages: https://www.toptal.com/javascript/option-maybe-either-future-monads-js
+
    
 

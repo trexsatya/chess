@@ -2,7 +2,7 @@ package chess
 
 import arrow.core.Either
 
-open class GameCommands {}
+open class GameCommands
 
 data class Pick(val position: Position): GameCommands()
 
@@ -10,10 +10,11 @@ data class Move(val fromPosition: Position, val toPosition: Position): GameComma
 
 data class Promotion(val position: Position, val pieceType: PieceType): GameCommands()
 
+//parameter x here is not required for our purposes, but Kotlin doesn't allow data class without parameter
 data class ShowBoard(val x: Int): GameCommands()
 
 fun parseInput(str: String?): Either<String, GameCommands> {
-    if(str == null || str.trim().length == 0) {
+    if(str == null || str.trim().isEmpty()) {
         return Either.right(ShowBoard(1))
     }
     val args = str.split(" ").map { it.trim() }

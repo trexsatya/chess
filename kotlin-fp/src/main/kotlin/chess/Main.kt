@@ -19,11 +19,10 @@ fun execute(cb: ChessBoard, cmdStr: String?) {
         println("Bye!")
         exitProcess(0)
     }
-    val cmd = parseInput(cmdStr)
-    when(cmd) {
+    when(val cmd = parseInput(cmdStr)) {
         is Either.Left -> game(cmd.a, cb)
         is Either.Right -> {
-            val result: Either<List<String>, ChessBoard> = when(cmd.b) {
+            val result = when(cmd.b) {
                 is Pick -> Either.right(showPossibleMoves((cmd.b as Pick).position, cb))
                 is Move -> validateAndMakeMove((cmd.b as Move).fromPosition, (cmd.b as Move).toPosition, cb)
                 is Promotion -> Either.left(listOf("unimplemented"))

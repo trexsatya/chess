@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="chess.MyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2021-03-19T12:14:50" hostname="GUVA-195068-C02YH05ZJHD5" time="0.023">
+<testsuite name="chess.MyTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2021-03-20T13:19:04" hostname="GUVA-195068-C02YH05ZJHD5" time="0.034">
   <properties/>
   <testcase name="returns the string representation of Position" classname="chess.MyTest" time="0.015"/>
   <testcase name="returns the matrix position from string" classname="chess.MyTest" time="0.0"/>
-  <testcase name="returns valid positions for Rook at given position" classname="chess.MyTest" time="0.008"/>
-  <system-out><![CDATA[]]></system-out>
+  <testcase name="returns valid positions for Rook at given position" classname="chess.MyTest" time="0.007"/>
+  <testcase name="returns valid positions for Bishop at given position" classname="chess.MyTest" time="0.011"/>
+  <system-out><![CDATA[    a  b  c  d  e  f  g  h 
+ 1 ?[47m ♙ ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m 1 
+ 2 ?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m 2 
+ 3 ?[47m   ?[0m?[46m   ?[0m?[43m ♖ ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m 3 
+ 4 ?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[47m   ?[0m 4 
+ 5 ?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[41m ♝ ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m 5 
+ 6 ?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[47m   ?[0m 6 
+ 7 ?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m 7 
+ 8 ?[46m   ?[0m?[43m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[47m   ?[0m?[46m   ?[0m?[43m   ?[0m 8 
+    a  b  c  d  e  f  g  h 
+]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

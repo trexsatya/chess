@@ -37,35 +37,17 @@ data class Piece(val color: Color, val type: PieceType) {
 }
 
 enum class BackgroundColor {
-    Yellow {
-        override fun toString(): String {
-            return "\u001B[43m"
-        }
-    },
-    Maroon {
-        override fun toString(): String {
-            return "\u001B[41m"
-        }
-    },
-    White() {
-        override fun toString(): String {
-            return "\u001B[47m"
-        }
-    },
-    Cyan() {
-        override fun toString(): String {
-            return "\u001B[46m"
-        }
-    }
+    Yellow { override fun toString(): String { return "\u001B[43m" } },
+    Maroon { override fun toString(): String { return "\u001B[41m" } },
+    White() { override fun toString(): String { return "\u001B[47m" } },
+    Cyan() { override fun toString(): String { return "\u001B[46m" } }
 }
 
 interface ChessBoard {
     //    Transforms a ChessBoard into a 'Vector' of square (either populated
 //    or empty), index 0 being square a1 and index 63 being square h8.
     fun toVector(cb: ChessBoard): List<Piece?>
-
     fun highlights(cb: ChessBoard): List<BackgroundColor?>
-
     fun nextPlayer(cb: ChessBoard): Color
 }
 
@@ -81,32 +63,17 @@ fun initialPosition(): ChessBoard {
 
             return whiteRearRow + whiteFrontRow + (1..4).map { emptyRow }.flatten() + blackFrontRow + blackRearRow
         }
-
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> {
-            return (1..64).map { null }
-        }
-
-        override fun nextPlayer(cb: ChessBoard): Color {
-            return WHITE
-        }
-
+        override fun highlights(cb: ChessBoard): List<BackgroundColor?> { return (1..64).map { null } }
+        override fun nextPlayer(cb: ChessBoard): Color { return WHITE }
     }
 }
 
 //-- | Change player making the next move.
 fun switch(cb: ChessBoard): ChessBoard {
     return object : ChessBoard {
-        override fun toVector(cb: ChessBoard): List<Piece?> {
-            return toVector(cb)
-        }
-
-        override fun highlights(cb: ChessBoard): List<BackgroundColor?> {
-            return highlights(cb)
-        }
-
-        override fun nextPlayer(cb: ChessBoard): Color {
-            return other(nextPlayer(cb))
-        }
+        override fun toVector(cb: ChessBoard): List<Piece?> { return toVector(cb) }
+        override fun highlights(cb: ChessBoard): List<BackgroundColor?> { return highlights(cb) }
+        override fun nextPlayer(cb: ChessBoard): Color { return other(nextPlayer(cb)) }
     }
 }
 
@@ -159,12 +126,16 @@ fun diffColor(cb: ChessBoard, x: Position, y: Position): Boolean {
     return colX != colY
 }
 
-fun from(cb: ChessBoard, here: Position, fn: KFunction1<Position, Position>): List<Position> {
+fun moveRecursion(cb: ChessBoard, start: Position, here: Position, fn: KFunction1<Position, Position>): List<Position> {
     val next = fn.invoke(here)
     if(!valid(next)) return listOf()
-    if(cellIsEmpty(cb, next)) return listOf(next) + from(cb, next, fn)
-    if(diffColor(cb, here, next)) return listOf(next)
+    if(cellIsEmpty(cb, next)) return listOf(next) + moveRecursion(cb, start, next, fn)
+    if(diffColor(cb, start, next)) return listOf(next)
     return listOf()
+}
+
+fun from(cb: ChessBoard, here: Position, fn: KFunction1<Position, Position>): List<Position> {
+    return moveRecursion(cb, here, here, fn)
 }
 
 fun up(pos: Position): Position {
@@ -248,7 +219,7 @@ fun knightMoves(cb: ChessBoard, pos: Position): List<Position> {
                  listOf((::down then ::down then ::right)(pos)) +
                  listOf((::left then ::left then ::up)(pos)) +
                  listOf((::left then ::left then ::down)(pos)) +
-                 listOf((::right then ::right then ::down)(pos)) +
+                 listOf((::right then ::right then ::up)(pos)) +
                  listOf((::right then ::right then ::down)(pos))
                 )
     return cells.filter { valid(it) }.filter { diffColor(cb, pos, it) || cellIsEmpty(cb, it) }
@@ -259,9 +230,9 @@ fun pawnMovesNonCapture(cb: ChessBoard, pos: Position, dirFn: KFunction1<Positio
 
     val next  = dirFn.invoke(pos)
     val nextToNext = (dirFn then dirFn)(pos)
-    val emptyList: List<Position> = listOf()
+
     if(movingForFirstTime(pos)) return listOf(next).filter { isEmpty(it) } +
-            (if (isEmpty(next) && isEmpty(nextToNext)) listOf(nextToNext) else emptyList)
+            (if (isEmpty(next) && isEmpty(nextToNext)) listOf(nextToNext) else listOf())
 
     return listOf(next).filter { isEmpty(it) }
 }
@@ -358,4 +329,3 @@ fun validateAndMakeMove(fromPos: Position?, toPos: Position?, board: ChessBoard)
     }
     return Either.right(movePiece(fromPos, toPos, board))
 }
-

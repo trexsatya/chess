@@ -38,7 +38,7 @@ object MyTest: Spek({
             ))
             assertEquals(false, cellIsEmpty(cb, Pair(0, 0)))
             assertEquals(false, cellIsEmpty(cb, Pair(2, 0)))
-            assertEquals(true, cellIsEmpty(cb, Pair(1, 0)))
+            assertEquals(true,  cellIsEmpty(cb, Pair(1, 0)))
             assertEquals(false, diffColor(cb, Pair(2, 0), Pair(0, 0)))
 
             val cb2 = boardForTesting(listOf(
@@ -47,6 +47,16 @@ object MyTest: Spek({
             assertEquals(listOf(Pair(1,0),Pair(0,0),Pair(3,0),Pair(4,0),Pair(5,0),Pair(6,0),Pair(7,0),Pair(2,1),Pair(2,2),Pair(2,3),Pair(2,4),Pair(2,5),Pair(2,6),Pair(2,7)),
                         rookMoves(cb2, Pair(2, 0))
             )
+        }
+
+        test("returns valid positions for Bishop at given position") {
+            val cb = boardForTesting(listOf(
+                piece(4, 4, Color.BLACK, PieceType.Bishop),
+                piece(0, 0, Color.WHITE, PieceType.Pawn),
+                piece(2, 2, Color.WHITE, PieceType.Rook)
+            ))
+
+            print(showChessBoard(showPossibleMoves(Pair(4, 4), cb)))
         }
 
 

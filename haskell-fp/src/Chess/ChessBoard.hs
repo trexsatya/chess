@@ -118,6 +118,7 @@ initialPosition = ChessBoard {
    whiteRearRow  = map (Just . Piece White) rearRow
    whiteFrontRow = replicate 8 $ Just $ Piece White Pawn
    emptyRow      = replicate 8 Nothing
+--   List comprehension an also be used here. emptyRow = [Nothing | i <- [1..8]] 
    blackFrontRow = replicate 8 $ Just $ Piece Black Pawn
    blackRearRow  = map (Just . Piece Black) rearRow
    rearRow       = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
@@ -173,13 +174,16 @@ diffColor cb x y  = case (pieceX, pieceY) of
                   otherwise -> False
                 where {pieceX = at cb x; pieceY = at cb y;}
 
+moveRecursion :: ChessBoard -> Position -> Position -> (Position -> Position) -> [Position]
+moveRecursion  cb start here f | not (P.valid next) = []
+                              | cellIsEmpty cb next = next : moveRecursion cb start next f
+                              | diffColor cb start next = [next]
+                              | otherwise = []
+                              where { next = f here; }
+
 from :: ChessBoard -> Position -> (Position -> Position) -> [Position]
-from cb here f
-         | not (P.valid next) = []
-         | cellIsEmpty cb next = next : from cb next f
-         | diffColor cb here next = [next]
-         | otherwise = []
-         where { next = f here; }
+from cb here = moveRecursion cb here here
+         
 
 -- trace (show here ++ " is " ++ show next ++" empty?" ++ show (cellIsEmpty cb next))
 -- we can use trace to do print-style debugging

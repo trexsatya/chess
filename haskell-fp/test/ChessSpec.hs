@@ -33,6 +33,7 @@ spec = do
       diffColor cb' (2, 0) (0, 0) `shouldBe` False
 
       let cb = boardForTesting [((4, 3), Piece White Rook)]
+--      print cb
       -- validate that all positions up, down, left, right are returned
       rookMoves cb (2, 0) `shouldBe` [(1,0),(0,0),(3,0),(4,0),(5,0),(6,0),(7,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7)]
       
@@ -81,3 +82,10 @@ spec = do
       parseInput "promote asd asd" `shouldBe` Left "Invalid position. First argument to promote must be a position e.g. a1"
       parseInput "promote a1 asd" `shouldBe` Left "Invalid piece. You can promote to queen, rook, bishop, or knight"
       parseInput "promote a1 rook" `shouldBe` Right (Promote (0,0) Rook)
+
+    it "returns valid positions for Bishop at given position" $ do
+      let cb' = boardForTesting [((4, 4), Piece Black Bishop), 
+                                 ((0, 0), Piece White Pawn), 
+                                 ((2, 2), Piece White Rook)]
+      print $ showPossibleMoves (Just (4, 4)) cb'                          
+      pawnMovesDown cb' (2, 1) `shouldBe` [(3,1)]

@@ -16,7 +16,7 @@ fun fromString(str: String) : Position? {
     val regex = """([abcdefgh])(\d)""".toRegex()
     val matchResult = regex.find(str) ?: return null
 
-    val (f, r) = matchResult!!.destructured
+    val (f, r) = matchResult.destructured
     val isValid = f[0] in 'a'..'h' && r.toInt() >= 1 && r.toInt() <= 8
     if (isValid)
         return Pair(r.toInt()-1, f[0].toInt() - 97)
