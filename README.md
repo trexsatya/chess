@@ -1,10 +1,12 @@
 # Polyglot Chess
 
-This repo is a collection of multiple implementations in different languages and different styles. The program is an implementation of the Chess game.
+This repo is a collection of multiple implementations of one program in different languages and different styles. The program is an implementation of the Chess game.
 
 There are mainly two styles of programming: Object-Oriented (OOP), and Functional (FP). There's imperative style but that's embedded in any OOP program as well. 
 FP is declarative as opposed to imperative style.
+
 Declarative means you tell what do you want (of course, you or someone else must provide an implementation of how a computer program will achieve that)
+
 Imperative means you tell do this, do that etc. You tell more of how to do it, than what you really want. Of course, with some refactoring, an imperative program can be made to look declarative.
 
 
