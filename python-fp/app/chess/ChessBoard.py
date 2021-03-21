@@ -66,7 +66,7 @@ def ansiCode(c: BackgroundColor) -> str:
 
 
 class ChessBoard:
-    "A structure that can have any fields defined."
+    """A structure that can have any fields defined."""
 
     def __init__(self, **entries): self.__dict__.update(entries)
 
@@ -262,8 +262,7 @@ def knightMoves(cb: ChessBoard, pos: Position) -> List[Position]:
                    )
 
 
-def pawnMovesNonCapture(cb: ChessBoard, pos: Position, dirFn: Callable, movingForTheFirstTime: Callable) -> List[
-    Position]:
+def pawnMovesNonCapture(cb: ChessBoard, pos: Position, dirFn: Callable, movingForTheFirstTime: Callable) -> List[Position]:
     isEmpty = lambda p: cellIsEmpty(cb, p)
 
     nextt = dirFn(pos)
@@ -328,10 +327,6 @@ def movePiece(posX: Maybe[Position], posY: Maybe[Position], cb: ChessBoard) -> C
 
 
 def validateAndMakeMove(posX: Maybe[Position], posY: Maybe[Position], cb: ChessBoard) -> Either[List[str], ChessBoard]:
-    def isPlayersTurn(piece: Maybe[Piece]):
-        (col, typ) = piece
-        return col == cb.nextPlayer()
-
     @curry
     def ifPlayersTurnMoveFrom(x: Position, piece: Piece):
         (col, typ) = piece
@@ -344,7 +339,7 @@ def validateAndMakeMove(posX: Maybe[Position], posY: Maybe[Position], cb: ChessB
             .map(lambda py: Right(movePiece(posX, posY, cb))) \
             .orElse(Left([f"Target position not given, or movement not allowed! {posY} not int {ys}"]))
 
-    def moveMaybePieceFromGivenPos(pos_piece: Tuple[int, Maybe[Position]]):
+    def moveMaybePieceFromGivenPos(pos_piece: Tuple[Position, Maybe[Position]]):
         (x, maybePiece) = pos_piece
         return maybePiece.map(ifPlayersTurnMoveFrom(x)) \
             .orElse(Left("No piece at given source position."))

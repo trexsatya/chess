@@ -13,7 +13,7 @@ def clearScreen():
 
 
 def execute(cb: ChessBoard, inpStr: Maybe[str]):
-    if inpStr == "quit":
+    if inpStr.flat_map(lambda x: x) == "quit":
         exit(1)
     cmd = parseInput(inpStr)
 
@@ -21,6 +21,7 @@ def execute(cb: ChessBoard, inpStr: Maybe[str]):
         game(cmd.value, cb)
     elif isinstance(cmd, Right):
         result = when(cmd.value, {
+            # This is a hack! Python doesn't have switch statements or any elegant form of case matching
             lambda x: isinstance(x, Pick): lambda: Right(showPossibleMoves(Just(cmd.value.position), cb)),
             lambda x: isinstance(x, Move): lambda: validateAndMakeMove(Just(cmd.value.fromPos), Just(cmd.value.toPos), cb),
             lambda x: isinstance(x, Promotion): Left("Unimplementted"),
