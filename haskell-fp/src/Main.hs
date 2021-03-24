@@ -19,6 +19,7 @@ import Data.List.Split
 import Debug.Trace
 import Chess.GameCommands
 import Data.Char (isSpace)
+import Control.Monad (when)
 
 
 main :: IO ()
@@ -35,13 +36,8 @@ clearScreen = do
 
 game :: Maybe String -> ChessBoard -> IO ()
 game msg cb = do
-   if isNothing msg
-    then  clearScreen >> print cb;
-    else pure()
-
-   if isJust msg
-     then print msg
-     else pure()
+   when (isNothing msg) (clearScreen >> print cb)
+   when (isJust msg) (print msg)
 
    putStr $ "input " ++ (if CB.nextPlayer cb == C.White then "WHITE" else "BLACK") ++ " > "
    hFlush stdout
