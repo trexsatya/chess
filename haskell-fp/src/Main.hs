@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Main(main) where
 
 import Chess.ChessBoard as CB
@@ -20,7 +22,9 @@ import Data.Char (isSpace)
 
 
 main :: IO ()
-main = game Nothing initialPosition
+main =  game (Just "Type a position to highlight the possible valid moves from that position. \
+                                   \Give two positions separated by space to move a piece. \
+                                   \Use Type promote <pos1> <pos2> to promote a piece. Press Enter to start") initialPosition
 --main = putStrLn ""
 
 clearScreen :: IO ()
@@ -41,23 +45,18 @@ game msg cb = do
 
    putStr $ "input " ++ (if CB.nextPlayer cb == C.White then "WHITE" else "BLACK") ++ " > "
    hFlush stdout
-   cmd <- getLine
-   execute cb cmd
+   str <- getLine
 
+--  let (err_msg, cb') = either (\left -> (Just(concat left), cb)) (\right -> (Nothing, right)) (parseInput str >>= executeCmd cb)
+--  The following is same as the above: Using TupleSection for conciseness 
+   let (err_msg, cb') = either (\left -> (Just(concat left), cb)) (Nothing,) (parseInput str >>= executeCmd cb)
+   game err_msg cb'
 
-execute :: ChessBoard -> String -> IO ()
-execute _ "quit" = putStrLn "Bye!"
-execute cb str = do
-          let cmd =  parseInput str
-          case cmd of
-            Left err -> game (Just err) cb
-            Right cmd -> 
-                  case result of
-                     Validation (Left errs) -> game (Just (concat errs)) cb
-                     Validation (Right cb') -> game Nothing cb'
-                     where { result = case cmd of
-                              Pick pos -> Validation $ Right (showPossibleMoves (Just pos) cb)
-                              Move x y -> validateAndMakeMove (Just x) (Just y) cb
-                              Promote pos piece -> Validation $ Left ["unimplemented"]
-                              ShowBoard -> Validation $ Right cb
-                      }
+-- Haskell's function definition-level pattern matching makes programs more concise, and clean
+
+executeCmd :: ChessBoard -> Command -> Either [String] ChessBoard
+executeCmd cb ShowBoard = Right cb
+executeCmd cb (Pick x) = Right (showPossibleMoves (Just x) cb)
+executeCmd cb (Move x y) = validateAndMakeMove (Just x) (Just y) cb
+executeCmd _ (Promote _ _) = Left ["unimplemented"]
+

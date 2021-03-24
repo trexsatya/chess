@@ -30,9 +30,8 @@ valid (f, r) = valid' f && valid' r
 
 fromString :: String -> Maybe Position
 fromString s = case s of  
-      [f, r] | f >= 'a' && f <= 'h' -> Just (digitToInt r-1, fromEnum f-97) 
-      otherwise -> Nothing 
-    -- where s = (l:n)
+      [f, r] | isDigit r && valid(f', r')  -> Just (r', f') where {r' = digitToInt r-1; f' = fromEnum f-97}
+      _ -> Nothing 
 
 showPosition :: Maybe Position -> String
 showPosition Nothing = ""

@@ -15,6 +15,9 @@ spec = do
   describe "Chess.Rules.MoveCalculation" $ do
     it "returns the string representation of Position" $ do
       showPosition (fromString "a1") `shouldBe` "a1"
+      fromString "ds" `shouldBe` Nothing
+      fromString "1s" `shouldBe` Nothing
+      fromString "s1" `shouldBe` Nothing
 
     it "returns the matrix position from string" $ do
       fromString "e8" `shouldBe` Just (7, 4)
@@ -75,12 +78,12 @@ spec = do
 
     it "returns parsed command from terminal" $ do
       parseInput "  " `shouldBe` Right ShowBoard
-      parseInput "12" `shouldBe` Left "invalid position. If you want to highlight the moves from a position, give just a position e.g. a1"
+      parseInput "12" `shouldBe` Left ["invalid position. If you want to highlight the moves from a position, give just a position e.g. a1"]
       parseInput " a1" `shouldBe` Right (Pick (0, 0))
       parseInput " a1   a2 " `shouldBe` Right (Move (0, 0) (1, 0))
-      parseInput " promote " `shouldBe` Left "If you are trying to promote a pawn, type promote <position> <piece name>"
-      parseInput "promote asd asd" `shouldBe` Left "Invalid position. First argument to promote must be a position e.g. a1"
-      parseInput "promote a1 asd" `shouldBe` Left "Invalid piece. You can promote to queen, rook, bishop, or knight"
+      parseInput " promote " `shouldBe` Left ["If you are trying to promote a pawn, type promote <position> <piece name>"]
+      parseInput "promote asd asd" `shouldBe` Left ["Invalid position. First argument to promote must be a position e.g. a1"]
+      parseInput "promote a1 asd" `shouldBe` Left ["Invalid piece. You can promote to queen, rook, bishop, or knight"]
       parseInput "promote a1 rook" `shouldBe` Right (Promote (0,0) Rook)
 
     it "returns valid positions for Bishop at given position" $ do

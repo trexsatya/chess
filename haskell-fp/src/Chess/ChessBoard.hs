@@ -118,7 +118,7 @@ initialPosition = ChessBoard {
    whiteRearRow  = map (Just . Piece White) rearRow
    whiteFrontRow = replicate 8 $ Just $ Piece White Pawn
    emptyRow      = replicate 8 Nothing
---   List comprehension an also be used here. emptyRow = [Nothing | i <- [1..8]] 
+--   List comprehension an also be used here. emptyRow = [Nothing | i <- [1..8]]
    blackFrontRow = replicate 8 $ Just $ Piece Black Pawn
    blackRearRow  = map (Just . Piece Black) rearRow
    rearRow       = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
@@ -183,7 +183,7 @@ moveRecursion  cb start here f | not (P.valid next) = []
 
 from :: ChessBoard -> Position -> (Position -> Position) -> [Position]
 from cb here = moveRecursion cb here here
-         
+
 
 -- trace (show here ++ " is " ++ show next ++" empty?" ++ show (cellIsEmpty cb next))
 -- we can use trace to do print-style debugging
@@ -291,7 +291,7 @@ possiblePositionsToMove pos cb = do
              Just (Piece _ King) -> kingMoves cb pos
              Just (Piece White Pawn) -> pawnMovesDown cb pos
              Just (Piece Black Pawn) -> pawnMovesUp cb pos
-             otherwise -> []
+             _ -> []
 
 showPossibleMoves :: Maybe Position -> ChessBoard -> ChessBoard
 showPossibleMoves Nothing cb = cb 
@@ -301,10 +301,8 @@ showPossibleMoves (Just pos) cb = ChessBoard { toVector = toVector cb,
                           nextPlayer = nextPlayer cb
                     }
 
-movePiece :: Maybe Position -> Maybe Position -> ChessBoard -> ChessBoard
-movePiece Nothing y cb = cb
-movePiece x Nothing cb = cb
-movePiece (Just x) (Just y) cb = switch $ ChessBoard { 
+movePiece :: Position -> Position -> ChessBoard -> ChessBoard
+movePiece x y cb = switch $ ChessBoard {
                           toVector = let cells = toVector cb in
                             cells V.// [(toIndex x, Nothing), (toIndex y, cells V.! toIndex x)],
                           highlights = V.fromList $ replicate 64 Nothing
@@ -316,26 +314,27 @@ movePiece (Just x) (Just y) cb = switch $ ChessBoard {
 --Introducing a newtype enables you to change how a type behaves.
 --By convention Left of Either  is used for errors, and Right for the correct value
 --https://blog.ploeh.dk/2018/11/05/applicative-validation/
-newtype Validation e r = Validation (Either e r) deriving (Eq, Show, Functor)
 --This allows composition of validation functions in order to return combined list of error messages.
+{-# LANGUAGE  GeneralizedNewtypeDeriving  #-}
+newtype Validation e r = Validation (Either e r) deriving (Eq, Show, Functor)
 instance Monoid m => Applicative (Validation m) where
   pure = Validation . pure
   Validation (Left x) <*> Validation (Left y) = Validation (Left (mappend x y))
   Validation f <*> Validation r = Validation (f <*> r)
 
-validateAndMakeMove :: Maybe Position -> Maybe Position -> ChessBoard -> Validation [String] ChessBoard
-validateAndMakeMove Nothing _ cb = Validation $ Left ["Invalid position"]
-validateAndMakeMove _ Nothing _  = Validation $ Left ["Invalid position"]
-validateAndMakeMove  fromPos  toPos cb =
+validateAndMakeMove :: Maybe Position -> Maybe Position -> ChessBoard -> Either [String] ChessBoard
+validateAndMakeMove Nothing _ _ = Left ["Invalid src position"]
+validateAndMakeMove _ Nothing _  =  Left ["Invalid target position"]
+validateAndMakeMove  (Just fromX)  (Just toY) cb =
         case pickedPiece of
-          Nothing -> Validation $ Left ["No piece at selected position"]
+          Nothing -> Left ["No piece at selected position"]
           Just (Piece color _) ->
-             let resp | y+1 `notElem` ys = Validation $ Left ["Not allowed! " ++ show(y+1) ++ " not in " ++ show ys]
-                      | color /= nextPlayer cb = Validation $ Left ["Not your turn!"]
-                      | otherwise = Validation $ Right (movePiece fromPos toPos cb)
+             let resp | y+1 `notElem` ys = Left ["Not allowed! " ++ show(y+1) ++ " not in " ++ show ys]
+                      | color /= nextPlayer cb = Left ["Not your turn!"]
+                      | otherwise = Right (movePiece fromX toY cb)
              in
              resp
-      where {ys = map ((+1).toIndex) (possiblePositionsToMove (fromJust fromPos) cb);
-             y = toIndex (fromJust toPos);
-             pickedPiece = at cb (fromJust fromPos)
+      where {ys = map ((+1).toIndex) (possiblePositionsToMove fromX cb);
+             y = toIndex toY;
+             pickedPiece = at cb fromX
       }
