@@ -314,36 +314,33 @@ def showPossibleMoves(pos: Maybe[Position], cb: ChessBoard) -> ChessBoard:
         .orElse(cb)
 
 
-def movePiece(posX: Maybe[Position], posY: Maybe[Position], cb: ChessBoard) -> ChessBoard:
+def movePiece(posX: Position, posY: Position, cb: ChessBoard) -> ChessBoard:
     def updatedCells(x: int, y: int, pieces: List[Maybe[Piece]]):
         return updatedList(pieces, [(y, pieces[x]), (x, Nothing)])
 
-    return posX.map(lambda px: posY.map(
-        lambda py: ChessBoard(toVector=lambda: updatedCells(toIndex(px), toIndex(py), cb.toVector()),
-                              highlights=lambda: [Nothing for _ in range(0, 64)],
-                              nextPlayer=lambda: other(cb.nextPlayer())))) \
-        .orElse(cb) \
-        .orElse(cb)
+    return ChessBoard(toVector=lambda: updatedCells(toIndex(posX), toIndex(posY), cb.toVector()),
+                      highlights=lambda: [Nothing for _ in range(0, 64)],
+                      nextPlayer=lambda: other(cb.nextPlayer()))
 
 
 def validateAndMakeMove(posX: Maybe[Position], posY: Maybe[Position], cb: ChessBoard) -> Either[List[str], ChessBoard]:
     @curry
-    def ifPlayersTurnMoveFrom(x: Position, piece: Piece):
+    def ifValidTargetFinallyMoveFrom(px: Position, py: Position):
+        ys = mapl(lambda p: toIndex(p), possiblePositionsToMove(cb, px))
+        return Right(movePiece(px, py, cb)) if toIndex(py) in ys else Left(["This move not allowed!"])
+
+    @curry
+    def ifMyTurn(px: Position, piece: Piece):
         (col, typ) = piece
         if not (col == cb.nextPlayer()):
             return Left(["Not your turn!"])
 
-        ys = mapl(lambda p: toIndex(p), possiblePositionsToMove(cb, x))
+        return posY\
+                .map(ifValidTargetFinallyMoveFrom(px))\
+                .orElse(Left([f"Target position not given"]))
 
-        return posY.filter(lambda py: toIndex(py) in ys) \
-            .map(lambda py: Right(movePiece(posX, posY, cb))) \
-            .orElse(Left([f"Target position not given, or movement not allowed! {posY} not int {ys}"]))
+    def maybeMoveFromSource(x: Position):
+        return at(cb, x).map(ifMyTurn(x)).orElse(Left(["No piece at given position"]))
 
-    def moveMaybePieceFromGivenPos(pos_piece: Tuple[Position, Maybe[Position]]):
-        (x, maybePiece) = pos_piece
-        return maybePiece.map(ifPlayersTurnMoveFrom(x)) \
-            .orElse(Left("No piece at given source position."))
-
-    return posX.map(lambda x: (x, cb.toVector()[toIndex(x)])) \
-        .map(moveMaybePieceFromGivenPos) \
+    return posX.map(maybeMoveFromSource) \
         .orElse(Left(["No source position given!"]))

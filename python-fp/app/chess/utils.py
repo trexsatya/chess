@@ -3,13 +3,17 @@ from types import FunctionType
 from typing import List, TypeVar, Callable, Iterable, Generic, Tuple
 
 from dataclasses import dataclass
-from toolz import assoc_in
+from toolz import assoc_in, curry
 
 T = TypeVar('T')
 U = TypeVar('U')
 
 
+@curry
 def mapl(fn: Callable, items: Iterable) -> List:
+    """
+    map the items and return a list. l stands for list in mapl
+    """
     return list(map(fn, items))
 
 
@@ -99,6 +103,9 @@ def fromNullable(val: T):
 
 
 class Either(Monad, Generic[T, U]):
+    def __init__(self):
+        raise Exception("Un-instantiable: use pure, Left, or Right methods")
+
     # pure :: a -> Either a
     @staticmethod
     def pure(value: U):
@@ -111,13 +118,20 @@ class Either(Monad, Generic[T, U]):
         else:
             return f(self.value)
 
+    def either(self, fn_left, fn_right):
+        if(self.is_left):
+            return fn_left(self.value)
+        else:
+            return fn_right(self.value)
+
 
 @dataclass
 class Left(Either, Generic[T]):
-    value: T
+    left: T
 
     def __init__(self, value):
         self.value = value
+        self.left = value
         self.is_left = True
 
     def __str__(self):
@@ -125,8 +139,11 @@ class Left(Either, Generic[T]):
 
 
 class Right(Either, Generic[U]):
+    right: T
+
     def __init__(self, value):
         self.value = value
+        self.right = value
         self.is_left = False
 
     def __str__(self):
@@ -146,6 +163,10 @@ def when(val: T, cases: dict, default=None):
     if not found:
         found = default
     return found() if found and isinstance(found, Callable) else found
+
+
+def is_(typ):
+    return lambda x: isinstance(x, typ)
 
 
 def updatedList(items: List[T], values: List[Tuple[int, T]]) -> List[T]:

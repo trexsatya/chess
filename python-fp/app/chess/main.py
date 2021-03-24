@@ -1,36 +1,30 @@
+from typing import List
+
+from toolz import curry
+
 from app.chess.ChessBoard import ChessBoard, showChessBoard, showPossibleMoves, initialPosition, validateAndMakeMove
 from app.chess.Color import Color
-from app.chess.GameCommands import parseInput, Pick, Move, Promotion
-from app.chess.utils import Maybe, Nothing, fromNullable, when, Left, Right, Just, _, lazy
+from app.chess.GameCommands import parseInput, Pick, Move, Promotion, GameCommands
+from app.chess.utils import Maybe, Nothing, fromNullable, when, Left, Right, Just, _, lazy, is_, Either
 from os import system
 import sys
 
 
 def clearScreen():
     print(chr(27) + "[2J")
-    # system("clear")
+    system("clear")
     sys.stderr.write("\x1b[2J\x1b[H")
 
 
-def execute(cb: ChessBoard, inpStr: Maybe[str]):
-    if inpStr.flat_map(lambda x: x) == "quit":
-        exit(1)
-    cmd = parseInput(inpStr)
-
-    if isinstance(cmd, Left):
-        game(cmd.value, cb)
-    elif isinstance(cmd, Right):
-        result = when(cmd.value, {
-            # This is a hack! Python doesn't have switch statements or any elegant form of case matching
-            lambda x: isinstance(x, Pick): lambda: Right(showPossibleMoves(Just(cmd.value.position), cb)),
-            lambda x: isinstance(x, Move): lambda: validateAndMakeMove(Just(cmd.value.fromPos), Just(cmd.value.toPos), cb),
-            lambda x: isinstance(x, Promotion): Left("Unimplementted"),
-            _: Right(cb)
-        })
-        if isinstance(result, Left):
-            game(result.value, cb)
-        else:
-            game(Nothing, result.value)
+@curry
+def executeCommand(cb: ChessBoard, cmd: GameCommands) -> Either[List[str], ChessBoard]:
+    return when(cmd, {
+        # This is a hack! Python doesn't have switch statements or any elegant form of case matching
+        is_(Pick): lambda: Right(showPossibleMoves(Just(cmd.position), cb)),
+        is_(Move): lambda: validateAndMakeMove(Just(cmd.fromPos), Just(cmd.toPos), cb),
+        is_(Promotion): Left("Unimplemented"),
+        _: Right(cb)
+    })
 
 
 def game(msg: Maybe[str], cb: ChessBoard):
@@ -41,7 +35,10 @@ def game(msg: Maybe[str], cb: ChessBoard):
         print(msg)
 
     print(f"input {'WHITE' if cb.nextPlayer() == Color.WHITE else 'BLACK'} > ", end="")
-    execute(cb, fromNullable(input()))
+
+    [msg, cb_] = parseInput(fromNullable(input())).flat_map(executeCommand(cb)).either(lambda l: [Just(" ".join(l)), cb], lambda r: [Nothing, r])
+
+    game(msg, cb_)
 
 
 if __name__ == '__main__':

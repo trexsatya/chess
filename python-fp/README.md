@@ -1,3 +1,9 @@
+### Chess Game
+Functionalities:
+
+1. Show the chessboard on terminal
+2. Accept commands (highlight, move) & update the board accordingly
+3. Perform validations before updating the board
 
 ### Python Synopsis:
 
