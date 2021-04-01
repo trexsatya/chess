@@ -125,7 +125,8 @@ Right (\x -> 3) <*> Right(2)  gives Right 3
 Left 1 <*> (left or right)    gives Left 1
 Left(1) >>= \x -> Left(2)     gives Left 1
 Right(1) >>= \x -> Left(2)    gives Left 2
-Right(1) >>= \x -> Right(\y -> [x, y]) <*> Right(2)
+Right(1) >>= \x -> Right(\y -> (x, y)) <*> Right(2)   gives Right (1,2)
+A shortcut for above is: Right(1) >>= \x -> Right((x,)) <*> Right(2) using TupleSections
 
 
 if p then s else pure ()

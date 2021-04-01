@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Chess.GameCommands where
 
 import Data.Char (isSpace)
@@ -6,6 +8,9 @@ import Chess.ChessBoard
 import Data.Maybe
 import Data.List.Split
 import Debug.Trace
+import Data.Bifunctor
+--import Control.Either
+--import Control.Error.Util
 
 trim :: String -> String
 trim = f . f
@@ -18,10 +23,26 @@ parsePickCommand str | isNothing p =  Left ["invalid position. If you want to hi
                      | otherwise = Right (Pick (fromJust p))
                       where {p = fromString str}
 
+combiner :: b -> Either a (b0 -> (b, b0));
+combiner x = Right (x,)
+
+maybeToRight :: a -> Maybe b -> Either a b
+maybeToRight a Nothing = Left a
+maybeToRight a (Just x) = Right x
+
+--parseMoveCommand:: String -> String -> Either [String] Command
+--parseMoveCommand str1 str2 =  mapToRight (uncurry Move) combined_pos
+--                      where { combined_pos = (maybeToRight ["Invalid source position!"] fromPos >>= combiner) <*>
+--                                              maybeToRight ["Invalid target position"] toPos;
+--                              mapToRight = second; fromPos = fromString str1; toPos = fromString str2
+--                       }
+
+-- The below is same as the above definition, but using the benefits of do keyword
 parseMoveCommand:: String -> String -> Either [String] Command
-parseMoveCommand str1 str2 | isNothing p1 || isNothing p2 =  Left ["invalid position. If you are trying to move a pice give two positions separaated by space e.g a1 a2"]
-                     | otherwise = Right (Move (fromJust p1) (fromJust p2))
-                      where {p1 = fromString str1; p2 = fromString str2}
+parseMoveCommand str1 str2 =  let {note a = maybe (Left a) Right} in do
+                         x <- note ["Invalid source position! You can move by giving two valid positions e.g. a1 a2"] (fromString str1)
+                         y <- note ["Invalid target position! You can move by giving two valid positions e.g. a1 a2"] (fromString str2)
+                         Right (Move x y)
 
 parsePromoteCommand:: [String] -> Either [String] Command
 parsePromoteCommand  args | length args /= 2 = Left ["If you are trying to promote a pawn, type promote <position> <piece name>"]
