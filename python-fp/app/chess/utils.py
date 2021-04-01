@@ -197,3 +197,29 @@ class Infix:
 
     def __call__(self, value1, value2):
         return self.function(value1, value2)
+
+
+AND = Infix(lambda f, g: (lambda x: f(x) and g(x)))
+
+
+def isNothing(m):
+    if m == Nothing:
+        return True
+    if isinstance(m, Nil):
+        return True
+
+
+def monadic_bind(ma, f_a_mb: Callable):
+    if isinstance(ma, Maybe):
+        if isNothing(ma):
+            return Nothing
+        return f_a_mb(ma.value)
+
+    if isinstance(ma, Either):
+        if isinstance(ma, Left):
+            return ma
+        return Right(f_a_mb(ma.value))
+
+
+bind = Infix(monadic_bind)
+

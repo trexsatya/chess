@@ -36,7 +36,9 @@ def game(msg: Maybe[str], cb: ChessBoard):
 
     print(f"input {'WHITE' if cb.nextPlayer() == Color.WHITE else 'BLACK'} > ", end="")
 
-    [msg, cb_] = parseInput(fromNullable(input())).flat_map(executeCommand(cb)).either(lambda l: [Just(" ".join(l)), cb], lambda r: [Nothing, r])
+    [msg, cb_] = parseInput(fromNullable(input())).flat_map(executeCommand(cb))\
+                                                           .either(lambda l: [Just(" ".join(l)), cb],
+                                                                   lambda r: [Nothing, r])
 
     game(msg, cb_)
 

@@ -7,7 +7,7 @@ from toolz import compose, curry
 from app.chess.Color import Color, other
 from app.chess.Position import charRangeInclusive, Position, toIndex, valid
 from app.chess.utils import mapl, concat, chunks, Maybe, Nothing, Just, filterl, updatedList, Either, Left, Right, \
-    Infix, lazy
+    Infix, lazy, AND
 
 
 class PieceType(Enum):
@@ -242,9 +242,6 @@ def bishopMoves(cb: ChessBoard, pos: Position) -> List[Position]:
 
 def queenMoves(cb: ChessBoard, pos: Position) -> List[Position]:
     return rookMoves(cb, pos) + bishopMoves(cb, pos)
-
-
-AND = Infix(lambda f, g: (lambda x: f(x) and g(x)))
 
 
 def knightMoves(cb: ChessBoard, pos: Position) -> List[Position]:
