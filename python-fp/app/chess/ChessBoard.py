@@ -1,49 +1,14 @@
-from dataclasses import dataclass
+
 from enum import Enum
 from typing import List, Tuple, Callable, Iterable
-
+from app.chess.Pieces import PieceType, Piece
 from toolz import compose, curry
 
 from app.chess.Color import Color, other
+from app.chess.GameCommands import Move
 from app.chess.Position import charRangeInclusive, Position, toIndex, valid
 from app.chess.utils import mapl, concat, chunks, Maybe, Nothing, Just, filterl, updatedList, Either, Left, Right, \
-    Infix, lazy, AND
-
-
-class PieceType(Enum):
-    Pawn = 1
-    Knight = 2
-    Bishop = 3
-    Rook = 4
-    Queen = 5
-    King = 6
-
-
-@dataclass
-class Piece:
-    color: Color
-    type: PieceType
-
-    def __iter__(self):
-        return [self.color, self.type].__iter__()
-
-    def __str__(self):
-        if self.color == Color.WHITE:
-            return {PieceType.Pawn: "♙",
-                    PieceType.Knight: "♘",
-                    PieceType.Bishop: "♗",
-                    PieceType.Rook: "♖",
-                    PieceType.Queen: "♕",
-                    PieceType.King: "♔"
-                    }[self.type]
-        else:
-            return {PieceType.Pawn: "♟",
-                    PieceType.Knight: "♞",
-                    PieceType.Bishop: "♝",
-                    PieceType.Rook: "♜",
-                    PieceType.Queen: "♛",
-                    PieceType.King: "♚"
-                    }[self.type]
+    Infix, lazy, AND, bind
 
 
 ANSI_RESET = "\u001B[0m"
@@ -320,24 +285,23 @@ def movePiece(posX: Position, posY: Position, cb: ChessBoard) -> ChessBoard:
                       nextPlayer=lambda: other(cb.nextPlayer()))
 
 
-def validateAndMakeMove(posX: Maybe[Position], posY: Maybe[Position], cb: ChessBoard) -> Either[List[str], ChessBoard]:
-    @curry
-    def ifValidTargetFinallyMoveFrom(px: Position, py: Position):
+def validateAndMakeMove(move: Move, cb: ChessBoard) -> Either[List[str], ChessBoard]:
+    def validateMove():
+        px: Position = move.fromPos
+        py: Position = move.toPos
         ys = mapl(lambda p: toIndex(p), possiblePositionsToMove(cb, px))
         return Right(movePiece(px, py, cb)) if toIndex(py) in ys else Left(["This move not allowed!"])
 
     @curry
-    def ifMyTurn(px: Position, piece: Piece):
+    def validateTurn(piece: Piece):
         (col, typ) = piece
         if not (col == cb.nextPlayer()):
             return Left(["Not your turn!"])
+        return Right(piece)
 
-        return posY\
-                .map(ifValidTargetFinallyMoveFrom(px))\
-                .orElse(Left([f"Target position not given"]))
+    def pieceAt(x: Position):
+        return at(cb, x).map(lambda x: Right(x)).orElse(Left(["No piece at source position!"]))
 
-    def maybeMoveFromSource(x: Position):
-        return at(cb, x).map(ifMyTurn(x)).orElse(Left(["No piece at given position"]))
-
-    return posX.map(maybeMoveFromSource) \
-        .orElse(Left(["No source position given!"]))
+    return pieceAt(move.fromPos) |bind| (
+                        lambda pieceX: validateTurn(pieceX) |bind| (lambda _:
+                                                                          validateMove()))

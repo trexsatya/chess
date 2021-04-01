@@ -3,9 +3,9 @@ from typing import Optional, List
 
 from toolz import compose
 
-from app.chess.ChessBoard import PieceType
+from app.chess.Pieces import PieceType
 from app.chess.Position import Position, fromString
-from app.chess.utils import Maybe, Nothing, Just, Either, Right, Left, mapl, when, bind
+from app.chess.utils import Maybe, Nothing, Just, Either, Right, Left, mapl, when, bind, maybeToLeft
 
 
 class GameCommands:
@@ -68,11 +68,13 @@ def parseMoveCommand(fromPosStr: str, toPosStr: str):
     # return fromString(fromPosStr).map(lambda x: fromString(toPosStr).map(lambda y: Right(Move(x, y)))
     #                                                                 .orElse(Left(msg))
     #                                   ).orElse(Left(msg))
-    from_ = fromString(fromPosStr)
-    to_ = fromString(toPosStr)
-    return  from_ |bind| (lambda x: to_
-                                    |bind| (lambda y:
-                                                    Right(Move(x, y))))
+    from_ = maybeToLeft(fromString(fromPosStr), ["Invalid source position!"])
+    to_   = maybeToLeft(fromString(toPosStr), ["Invalid target position!"])
+
+    res = from_ |bind| (lambda x:
+                        to_ |bind| (lambda y:
+                                    Right(Move(x, y))))
+    return res
 
 
 def parseInput(inputStr: Maybe[str]) -> Either[List[str], GameCommands]:

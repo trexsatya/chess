@@ -218,8 +218,13 @@ def monadic_bind(ma, f_a_mb: Callable):
     if isinstance(ma, Either):
         if isinstance(ma, Left):
             return ma
-        return Right(f_a_mb(ma.value))
+        return f_a_mb(ma.value)
 
 
 bind = Infix(monadic_bind)
 
+
+def maybeToLeft(mb: Maybe, left_):
+    if isNothing(mb):
+        return Left(left_)
+    return Right(mb.value)

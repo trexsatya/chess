@@ -21,7 +21,7 @@ def executeCommand(cb: ChessBoard, cmd: GameCommands) -> Either[List[str], Chess
     return when(cmd, {
         # This is a hack! Python doesn't have switch statements or any elegant form of case matching
         is_(Pick): lambda: Right(showPossibleMoves(Just(cmd.position), cb)),
-        is_(Move): lambda: validateAndMakeMove(Just(cmd.fromPos), Just(cmd.toPos), cb),
+        is_(Move): lambda: validateAndMakeMove(cmd, cb),
         is_(Promotion): Left("Unimplemented"),
         _: Right(cb)
     })
