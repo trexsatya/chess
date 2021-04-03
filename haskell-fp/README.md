@@ -58,7 +58,7 @@ the first result is ignored while returning the final result
 
 
 >>= passes the result of first action to the second
-((*) <$> Just 2 <*> Just 8 ) >> Just         result is Just 16
+((*) <$> Just 2 <*> Just 8 ) >>= Just         result is Just 16
 
 
 instance Monad ((->) r) where
@@ -152,5 +152,6 @@ mappend [1] [2]  gives [1,2]
 mconcat ["Hello", " ", "Haskell", "!"]   gives "Hello Haskell!"
 
 
+Haskell REPL Tool: ghci
 
 ```

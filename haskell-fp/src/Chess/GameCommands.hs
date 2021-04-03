@@ -38,11 +38,20 @@ maybeToRight a (Just x) = Right x
 --                       }
 
 -- The below is same as the above definition, but using the benefits of do keyword
+--parseMoveCommand:: String -> String -> Either [String] Command
+--parseMoveCommand str1 str2 =  let {note a = maybe (Left a) Right} in do
+--                         x <- note ["Invalid source position! You can move by giving two valid positions e.g. a1 a2"] (fromString str1)
+--                         y <- note ["Invalid target position! You can move by giving two valid positions e.g. a1 a2"] (fromString str2)
+--                         Right (Move x y)
+
+-- This is also the same as above
 parseMoveCommand:: String -> String -> Either [String] Command
-parseMoveCommand str1 str2 =  let {note a = maybe (Left a) Right} in do
-                         x <- note ["Invalid source position! You can move by giving two valid positions e.g. a1 a2"] (fromString str1)
-                         y <- note ["Invalid target position! You can move by giving two valid positions e.g. a1 a2"] (fromString str2)
-                         Right (Move x y)
+parseMoveCommand str1 str2 =  maybeToRight ["Invalid source position!"] fromPos >>=
+                                                                           \from -> maybeToRight ["Invalid target position"] toPos 
+                                                                                >>= \to -> Right $ Move from to
+                      where { 
+                              fromPos = fromString str1; toPos = fromString str2
+                       }
 
 parsePromoteCommand:: [String] -> Either [String] Command
 parsePromoteCommand  args | length args /= 2 = Left ["If you are trying to promote a pawn, type promote <position> <piece name>"]
