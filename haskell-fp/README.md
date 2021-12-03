@@ -82,8 +82,7 @@ Where did this <*> come from?
 
 What if you have a binary function, and you want a function that SHOULD NOT work on normal values, but only on (both) values wrapped.
 
-liftA2 is the way to go, this is also defined by every Applicative
-
+Example:
 -----------------------------
 
 max -- normal function
