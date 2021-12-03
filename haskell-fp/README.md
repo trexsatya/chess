@@ -28,38 +28,104 @@ Portability of Monad concept into other programming languages: https://www.topta
 
 ``` 
 
-Functors, Applicative, and Monads are patterns
+toUpper 'a' -- works on character, does not work on string (i.e. List of characters)
+
+What if the argument to toUpper is null?
+You don't want to write a function specially to handle that, right?
+
+The solution is that don't take the raw value as an argument,
+
+Instead take a wrapped value as argument
+If you take the value wrapped in Maybe, you can apply the toUpper function without any additional effort
+
+fmap toUpper $ Just('c')  -- gives Just 'c'
+fmap toUpper $ Nothing  -- gives Nothing
+
+-- Maybe is a pattern, Nothing and Just are instances of that pattern.
+
+Where did this fmap come from? - It is defined when Maybe was defined, 
+
+Now, you can generalise this scenario:-
+    we wrapped a value in a "container" (i.e Maybe in this case), 
+	  And while building/declaring that container, we declared a function which is special.
+	  	It is special because it can take a normal function which acts on a normal value, and it returns another function, which acts on the wrapped value.
+This scenario, in itself, is another pattern. This pattern is called Functor.
+And Maybe is an instance of this Functor pattern.
 
 
+So, instead of handling this null-safety in a lot of functions that you might have apart from toUpper,
+	you shift the responsibility of null-safety into a special type called Maybe
 
-Functor:
- something that can work on the value wrapped <$> wrapped-value 
- fmap in Haskell
-
- fmap (++"!") (Just "wisdom") ; the result will be Just "wisdom!" 
- (++"!") <$> (Just "wisdom")  ; will also give the same result
-
---------------------------------------------------
-
-Applicative:
- something that can work on the value wrapped, but is itself wrapped <*> wrapped-values
-
- Just (+3) <*> Just 3  ; the result will be Just 6
-
---------------------------------------------------
-
-Monad:
- something that can work on the value wrapped, but returns the wrapped values instead of plain values  >>=  wrapped-values
+'x <$> y' is just a different way to write 'fmap x y'
 
 
->> is just like ; in imperative languages
-the first result is ignored while returning the final result
-((*) <$> Just 2 <*> Just 8 ) >> Just (1)     result is Just 1
+You can look at it from a different (inverse perspective):
+	If you have a normal value wrapped in some container like Maybe, Either,
+	then fmap is the way to apply a normal function to the wrapped value
+
+	enhancedFunction = (function <$>) -- If you want a function which SHOULD NOT work on normal value, but only on wrapped values
 
 
->>= passes the result of first action to the second
-((*) <$> Just 2 <*> Just 8 ) >>= Just         result is Just 16
+-----------------------------
 
+Can't the function itself be null?
+In FP languages, functions are themselves a result of computation, so they can be passed around and returned from another function,
+So, it definitely can be null.
+
+So, to make it safer:
+You wrap the function itself
+
+toUpperEnhanced = Just(toUpper) <*> -- toUpper is now a wrapped function which will work only on wrapped character values
+Where did this <*> come from?
+	It is declared when Maybe was declared as an Applicative
+
+
+What if you have a binary function, and you want a function that SHOULD NOT work on normal values, but only on (both) values wrapped.
+
+liftA2 is the way to go, this is also defined by every Applicative
+
+-----------------------------
+
+max -- normal function
+maxEnhanced = (max <$>) -- works on wrapped value
+maxEnhancedPartiallyApplied = maxEnhanced (Just 3) -- Applicative functor, because as a result of this computation, we get a wrapped function 
+
+maxEnhancedPartiallyApplied <*> (Just 6) => 6
+
+Same as, 'max <$> Just 3 <*> Just 6'
+
+
+------------------------------
+
+What if you have a function that takes normal value but returns wrapped value?
+How would you apply a wrapped value to such a function?
+
+This functionality is provided by Monads
+
+When Maybe is declared as a Monad, it declares this operator/function >>=
+
+wrapped-value >>= function-returning-wrapped-value
+
+This allows us to chain many such functions which return a wrapped value to get the final result
+
+	wrapped-value >>= fn_1 >>= fn_2
+
+Example
+-------------------------
+foo :: Maybe String  
+foo = Just 3   >>= (\x -> 
+      Just "!" >>= (\y -> 
+      Just (show x ++ y))) 
+
+Same can be written using do notation
+-------------------------------------
+foo :: Maybe String  
+foo = do  
+    x <- Just 3  
+    y <- Just "!"  
+    Just (show x ++ y)  
+
+-------------------------------------------------------
 
 instance Monad ((->) r) where
     f >>= k = \ r -> k (f r) r
